@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Your Event Ticket</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+    .ticket-box {
+      border: 2px solid #000;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 400px;
+      margin: auto;
+    }
+    img {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Your Event Ticket</h2>
+
+  <div class="ticket-box">
+    <h3 id="tid"></h3>
+    <img id="qr" width="250" />
+  </div>
+
+  <script>
+    // Read ticket ID from URL → ?id=xxxx
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get("id");
+
+    // Show ticket ID
+    document.getElementById("tid").innerText = "Ticket ID: " + id;
+
+    // Set QR code image with Google QR API
+    document.getElementById("qr").src =
+      "https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=" +
+      encodeURIComponent(id);
+  </script>
+</body>
+</html>
