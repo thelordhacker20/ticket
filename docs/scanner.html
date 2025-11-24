@@ -1,34 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QR Scanner</title>
+
+  <!-- QR Scanner Library -->
+  <script src="https://unpkg.com/html5-qrcode?v=5" type="text/javascript"></script>
+
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      padding: 20px;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .green { color: green; }
+    .red { color: red; }
+  </style>
+</head>
+
+<body>
+
+<h2>Scan Ticket</h2>
+
+<div id="reader" style="width: 300px; margin:auto;"></div>
+<div id="status">Waiting for scan...</div>
+
+<!-- Sounds -->
+<audio id="beep-success" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+<audio id="beep-error" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+
 <script>
   const webAppURL = "https://script.google.com/macros/s/AKfycbwkkhb8OOU0LVuZvLK9Y5HxqIPHMG3v9B-e_1j_DNzshXRtGBrzQWL-c4lCQ2YW82Jb/exec";
 
   function onScanSuccess(decodedText) {
-    // SHOW WHAT WAS SCANNED
-    document.getElementById("status").innerHTML = "Scanned: " + decodedText + "<br>Processing...";
+
+    // SHOW EXACT SCANNED VALUE
+    document.getElementById("status").innerHTML =
+      "Scanned: <b>" + decodedText + "</b><br>Processing...";
 
     // SEND TO WEB APP
     fetch(webAppURL + "?ticket=" + decodedText)
       .then(res => res.text())
       .then(result => {
+
         let status = document.getElementById("status");
 
         if (result === "MARKED") {
-          status.innerHTML = "Scanned: " + decodedText + "<br><span class='green'>Attendance Marked ✔</span>";
+          status.innerHTML =
+            "Scanned: <b>" + decodedText + "</b><br><span class='green'>Attendance Marked ✔</span>";
           document.getElementById("beep-success").play();
 
         } else if (result === "ALREADY_MARKED") {
-          status.innerHTML = "Scanned: " + decodedText + "<br><span class='red'>Already Marked ❗</span>";
+          status.innerHTML =
+            "Scanned: <b>" + decodedText + "</b><br><span class='red'>Already Marked ❗</span>";
           document.getElementById("beep-error").play();
 
         } else {
-          status.innerHTML = "Scanned: " + decodedText + "<br><span class='red'>Ticket Not Found ❌</span>";
+          status.innerHTML =
+            "Scanned: <b>" + decodedText + "</b><br><span class='red'>Ticket Not Found ❌</span>";
           document.getElementById("beep-error").play();
         }
       });
   }
 
+  // Start camera
   new Html5Qrcode("reader").start(
     { facingMode: "environment" },
     { fps: 10, qrbox: 250 },
     onScanSuccess
   );
 </script>
+
+</body>
+</html>
