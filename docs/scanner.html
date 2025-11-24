@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QR Scanner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- HTML5 QR Scanner Library -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      padding: 20px;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Scan Ticket</h2>
+  
+  <div id="reader" style="width: 300px; margin:auto;"></div>
+  <div id="result"></div>
+
+  <script>
+    function onScanSuccess(decodedText) {
+
+      document.getElementById("result").innerHTML =
+        "Scanned: " + decodedText + "<br>Marking attendance...";
+
+      fetch("YOUR_WEBAPP_URL?ticket=" + decodedText)
+        .then(r => r.text())
+        .then(res => {
+          document.getElementById("result").innerHTML =
+            "Result: " + res;
+        });
+    }
+
+    new Html5Qrcode("reader").start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 250 },
+      onScanSuccess
+    );
+  </script>
+
+</body>
+</html>
