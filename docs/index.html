@@ -2,53 +2,140 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Your Event Ticket</title>
+  <title>IEEE Workshop Ticket</title>
 
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #eef2f7;
       text-align: center;
     }
 
-    .ticket-box {
-      border: 2px solid #000;
-      padding: 20px;
-      border-radius: 14px;
-      max-width: 420px;
-      margin: auto;
-      margin-top: 40px;
+    .header {
+      background: linear-gradient(135deg, #0033a0, #0047cc);
+      color: white;
+      padding: 25px 10px;
+      font-size: 26px;
+      font-weight: bold;
+      letter-spacing: 1px;
     }
 
-    img {
+    .ticket-box {
+      background: white;
+      max-width: 430px;
+      margin: 30px auto;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0px 6px 20px rgba(0,0,0,0.12);
+      border-top: 6px solid #0033a0;
+    }
+
+    .event-logo {
+      width: 130px;
+      margin-bottom: 12px;
+    }
+
+    .event-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #0033a0;
+      margin-top: 10px;
+    }
+
+    .event-date {
+      font-size: 15px;
+      color: #444;
+      margin-bottom: 15px;
+    }
+
+    .user-info {
+      font-size: 17px;
+      font-weight: bold;
+      margin-top: 10px;
+      color: #222;
+    }
+
+    .ieee-id {
+      font-size: 14px;
+      color: #333;
+      margin-top: 4px;
+    }
+
+    .qr-box {
       margin-top: 20px;
-      border: 1px solid #ccc;
-      padding: 10px;
-      border-radius: 10px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 14px;
+      display: inline-block;
+      border: 2px dashed #aab4c8;
+    }
+
+    .footer {
+      font-size: 13px;
+      color: #666;
+      margin-top: 20px;
     }
   </style>
 </head>
 
 <body>
-  <h2>Your Event Ticket</h2>
+
+  <div class="header">IEEE BIT Student Branch</div>
 
   <div class="ticket-box">
-    <h3 id="tid"></h3>
-    <img id="qr" width="250" height="250">
+
+    <!-- LOGO -->
+    <img src="https://thelordhacker20.github.io/ticket/logo_20251014_165849_0000.png
+" class="event-logo" />
+
+    <!-- EVENT DETAILS -->
+    <div class="event-title">2-day Linux & TCL Workshop</div>
+    <div class="event-date">1st & 2nd December</div>
+
+    <!-- ATTENDEE NAME -->
+    <div class="user-info" id="username">Name: Loading...</div>
+
+    <!-- OPTIONAL IEEE ID -->
+    <div class="ieee-id" id="ieeeid"></div>
+
+    <!-- QR CODE -->
+    <div class="qr-box">
+      <img id="qr" width="260" height="260">
+    </div>
+
+    <div class="footer">
+      Show this QR at the registration desk for attendance.
+    </div>
+
   </div>
 
-  <script>
-    // STEP 1: read ticket ID from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get("id");
+<script>
+  // Read parameters: ?id=XXXX&name=John&ieee=1234
+  const params = new URLSearchParams(window.location.search);
 
-    // STEP 2: show the ticket ID
-    document.getElementById("tid").innerText = "Ticket ID: " + id;
+  const ticketID = params.get("id");
+  const name = params.get("name");
+  const ieee = params.get("ieee");
 
-    // STEP 3: set QR code from secure API
-    const qrURL = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(id);
+  // Display name on ticket
+  if (name) {
+    document.getElementById("username").innerText = "Name: " + name;
+  } else {
+    document.getElementById("username").innerText = "Name: Unknown";
+  }
 
-    document.getElementById("qr").src = qrURL;
-  </script>
+  // Optional IEEE ID
+  if (ieee) {
+    document.getElementById("ieeeid").innerText = "IEEE ID: " + ieee;
+  }
+
+  // QR Code = ticketID
+  document.getElementById("qr").src =
+    "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" 
+    + encodeURIComponent(ticketID);
+</script>
+
 </body>
 </html>
