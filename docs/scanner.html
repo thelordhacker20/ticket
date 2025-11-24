@@ -1,71 +1,46 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Scan Ticket</title>
+// ... (rest of the onScanSuccess function) ...
 
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  function onScanSuccess(decodedText) {
+    document.getElementById("status").innerHTML =
+      "Scanned: " + decodedText + "<br>Processing...";
 
-  <style>
-    body {
-      font-family: Arial;
-      text-align: center;
-      padding: 20px;
-    }
-    .green { color: green; font-size: 20px; }
-    .red { color: red; font-size: 20px; }
-  </style>
-</head>
+    // 🚨 FIX START: Extract ONLY the 'id' parameter from the scanned full URL
+    try {
+      const url = new URL(decodedText);
+      const ticketIdOnly = url.searchParams.get('id');
 
-<body>
+      if (!ticketIdOnly) {
+        throw new Error("ID not found in scanned data.");
+      }
 
-<h2>Scan Ticket</h2>
+      // Send ONLY the extracted ID to the Apps Script Web App
+      fetch(webAppURL + "?ticket=" + ticketIdOnly) 
+        .then(res => res.text())
+        .then(result => {
+          let status = document.getElementById("status");
 
-<div id="reader" style="width: 300px; margin:auto;"></div>
-<div id="status"></div>
+          // ... (rest of your success/error logic remains the same) ...
 
-<audio id="beep-success" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
-<audio id="beep-error" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+          if (result === "MARKED") {
+            status.innerHTML = "Attendance Marked ✔";
+            status.className = "green";
+            document.getElementById("beep-success").play();
+          } else if (result === "ALREADY_MARKED") {
+            status.innerHTML = "Already Marked ❗";
+            status.className = "red";
+            document.getElementById("beep-error").play();
+          } else {
+            status.innerHTML = "Ticket Not Found ❌ (" + result + ")";
+            status.className = "red";
+            document.getElementById("beep-error").play();
+          }
+        });
+    } catch (error) {
+      document.getElementById("status").innerHTML = "Error: Invalid QR Code Format ❌";
+      document.getElementById("status").className = "red";
+      document.getElementById("beep-error").play();
+    }
+    // 🚨 FIX END
+  }
 
-<script>
-
-  // 🔴 PUT YOUR EXEC URL HERE
-  const webAppURL = "https://script.google.com/macros/s/AKfycbwkkhb8OOU0LVuZvLK9Y5HxqIPHMG3v9B-e_1j_DNzshXRtGBrzQWL-c4lCQ2YW82Jb/exec";
-
-  function onScanSuccess(decodedText) {
-    document.getElementById("status").innerHTML =
-      "Scanned: " + decodedText + "<br>Processing...";
-
-    fetch(webAppURL + "?ticket=" + decodedText)
-      .then(res => res.text())
-      .then(result => {
-        let status = document.getElementById("status");
-
-        if (result === "MARKED") {
-          status.innerHTML = "Attendance Marked ✔";
-          status.className = "green";
-          document.getElementById("beep-success").play();
-
-        } else if (result === "ALREADY_MARKED") {
-          status.innerHTML = "Already Marked ❗";
-          status.className = "red";
-          document.getElementById("beep-error").play();
-
-        } else {
-          status.innerHTML = "Ticket Not Found ❌";
-          status.className = "red";
-          document.getElementById("beep-error").play();
-        }
-      });
-  }
-
-  new Html5Qrcode("reader").start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: 250 },
-    onScanSuccess
-  );
-
-</script>
-
-</body>
-</html>
+// ... (rest of the script) ...
