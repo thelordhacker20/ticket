@@ -10,15 +10,21 @@
       padding: 20px;
       text-align: center;
     }
+
     .ticket-box {
       border: 2px solid #000;
       padding: 20px;
-      border-radius: 12px;
-      max-width: 400px;
+      border-radius: 14px;
+      max-width: 420px;
       margin: auto;
+      margin-top: 40px;
     }
+
     img {
       margin-top: 20px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 10px;
     }
   </style>
 </head>
@@ -28,21 +34,21 @@
 
   <div class="ticket-box">
     <h3 id="tid"></h3>
-    <img id="qr" width="250" />
+    <img id="qr" width="250" height="250">
   </div>
 
   <script>
-    // Read ticket ID from URL → ?id=xxxx
+    // STEP 1: read ticket ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get("id");
 
-    // Show ticket ID
+    // STEP 2: show the ticket ID
     document.getElementById("tid").innerText = "Ticket ID: " + id;
 
-    // Set QR code image with Google QR API
-    document.getElementById("qr").src =
-  "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" +
-  encodeURIComponent(id);
+    // STEP 3: set QR code from secure API
+    const qrURL = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(id);
+
+    document.getElementById("qr").src = qrURL;
   </script>
 </body>
 </html>
