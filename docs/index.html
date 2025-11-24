@@ -41,8 +41,8 @@
 
     // Set QR code image with Google QR API
     document.getElementById("qr").src =
-      "https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=" +
-      encodeURIComponent(id);
+  "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" +
+  encodeURIComponent(id);
   </script>
 </body>
 </html>
