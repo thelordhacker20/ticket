@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>QR Scanner</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QR Scanner</title>
 
-  <!-- HTML5 QR Scanner Library -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
   <style>
@@ -13,40 +12,63 @@
       text-align: center;
       padding: 20px;
     }
-    #result {
+
+    #status {
       margin-top: 20px;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: bold;
     }
+
+    .green { color: green; }
+    .red { color: red; }
   </style>
 </head>
 
 <body>
-  <h2>Scan Ticket</h2>
-  
-  <div id="reader" style="width: 300px; margin:auto;"></div>
-  <div id="result"></div>
 
-  <script>
-    function onScanSuccess(decodedText) {
+<h2>Scan Ticket</h2>
 
-      document.getElementById("result").innerHTML =
-        "Scanned: " + decodedText + "<br>Marking attendance...";
+<div id="reader" style="width: 300px; margin:auto;"></div>
+<div id="status"></div>
 
-      fetch("https://script.google.com/macros/s/AKfycbwkkhb8OOU0LVuZvLK9Y5HxqIPHMG3v9B-e_1j_DNzshXRtGBrzQWL-c4lCQ2YW82Jb/exec?ticket=" + decodedText)
-        .then(r => r.text())
-        .then(res => {
-          document.getElementById("result").innerHTML =
-            "Result: " + res;
-        });
-    }
+<audio id="beep-success" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+<audio id="beep-error" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
 
-    new Html5Qrcode("reader").start(
-      { facingMode: "environment" },
-      { fps: 10, qrbox: 250 },
-      onScanSuccess
-    );
-  </script>
+<script>
+  const webAppURL = "https://script.google.com/macros/s/AKfycbwkkhb8OOU0LVuZvLK9Y5HxqIPHMG3v9B-e_1j_DNzshXRtGBrzQWL-c4lCQ2YW82Jb/exec";
+
+  function onScanSuccess(decodedText) {
+    document.getElementById("status").innerHTML = "Processing...";
+    
+    fetch(webAppURL + "?ticket=" + decodedText)
+      .then(res => res.text())
+      .then(result => {
+        let status = document.getElementById("status");
+
+        if (result === "MARKED") {
+          status.innerHTML = "Attendance Marked ✔";
+          status.className = "green";
+          document.getElementById("beep-success").play();
+
+        } else if (result === "ALREADY_MARKED") {
+          status.innerHTML = "Already Marked ❗";
+          status.className = "red";
+          document.getElementById("beep-error").play();
+
+        } else {
+          status.innerHTML = "Ticket Not Found ❌";
+          status.className = "red";
+          document.getElementById("beep-error").play();
+        }
+      });
+  }
+
+  new Html5Qrcode("reader").start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    onScanSuccess
+  );
+</script>
 
 </body>
 </html>
