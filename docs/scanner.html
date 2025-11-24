@@ -1,63 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>QR Scanner</title>
-
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-
-  <style>
-    body {
-      font-family: Arial;
-      text-align: center;
-      padding: 20px;
-    }
-
-    #status {
-      margin-top: 20px;
-      font-size: 20px;
-      font-weight: bold;
-    }
-
-    .green { color: green; }
-    .red { color: red; }
-  </style>
-</head>
-
-<body>
-
-<h2>Scan Ticket</h2>
-
-<div id="reader" style="width: 300px; margin:auto;"></div>
-<div id="status"></div>
-
-<audio id="beep-success" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
-<audio id="beep-error" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
-
 <script>
   const webAppURL = "https://script.google.com/macros/s/AKfycbwkkhb8OOU0LVuZvLK9Y5HxqIPHMG3v9B-e_1j_DNzshXRtGBrzQWL-c4lCQ2YW82Jb/exec";
 
   function onScanSuccess(decodedText) {
-    document.getElementById("status").innerHTML = "Processing...";
-    
+    // SHOW WHAT WAS SCANNED
+    document.getElementById("status").innerHTML = "Scanned: " + decodedText + "<br>Processing...";
+
+    // SEND TO WEB APP
     fetch(webAppURL + "?ticket=" + decodedText)
       .then(res => res.text())
       .then(result => {
         let status = document.getElementById("status");
 
         if (result === "MARKED") {
-          status.innerHTML = "Attendance Marked ✔";
-          status.className = "green";
+          status.innerHTML = "Scanned: " + decodedText + "<br><span class='green'>Attendance Marked ✔</span>";
           document.getElementById("beep-success").play();
 
         } else if (result === "ALREADY_MARKED") {
-          status.innerHTML = "Already Marked ❗";
-          status.className = "red";
+          status.innerHTML = "Scanned: " + decodedText + "<br><span class='red'>Already Marked ❗</span>";
           document.getElementById("beep-error").play();
 
         } else {
-          status.innerHTML = "Ticket Not Found ❌";
-          status.className = "red";
+          status.innerHTML = "Scanned: " + decodedText + "<br><span class='red'>Ticket Not Found ❌</span>";
           document.getElementById("beep-error").play();
         }
       });
@@ -69,6 +32,3 @@
     onScanSuccess
   );
 </script>
-
-</body>
-</html>
