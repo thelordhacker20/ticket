@@ -1,46 +1,120 @@
-const webAppURL = "YOUR_EXEC_URL_HERE"; // replace with your /exec URL
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scan Ticket</title>
 
-function onScanSuccess(decodedText) {
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
-  document.getElementById("status").innerHTML =
-    "Scanned: " + decodedText + "<br>Processing...";
-
-  // ---- Extract TicketID from full URL QR ----
-  try {
-    const url = new URL(decodedText);
-    const ticketIdOnly = url.searchParams.get("id");
-
-    if (!ticketIdOnly) {
-      throw new Error("ID not found in scanned data.");
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      padding: 20px;
+      background-color: #f4f4f4;
     }
+    .container {
+      max-width: 450px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #0033a0;
+    }
+    .green { 
+      color: green; 
+      font-size: 20px; 
+      font-weight: bold;
+    }
+    .red { 
+      color: red; 
+      font-size: 20px; 
+      font-weight: bold;
+    }
+  </style>
+</head>
 
-    // Send ONLY the TicketID to Apps Script
-    fetch(webAppURL + "?ticket=" + ticketIdOnly)
-      .then(res => res.text())
-      .then(result => {
-        let status = document.getElementById("status");
+<body>
+<div class="container">
+  <h2>Scan Ticket</h2>
 
-        if (result === "MARKED") {
-          status.innerHTML = "Attendance Marked ✔";
-          status.className = "green";
-          document.getElementById("beep-success").play();
+  <div id="reader" style="width: 300px; margin:auto;"></div>
+  
+  <div id="status" style="margin-top: 20px;">Ready to Scan</div>
 
-        } else if (result === "ALREADY_MARKED") {
-          status.innerHTML = "Already Marked ❗";
+  <audio id="beep-success" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+  <audio id="beep-error" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+
+<script>
+
+  // 🔴 IMPORTANT: REPLACE THIS WITH YOUR DEPLOYED ATTENDANCE WEB APP EXECUTION URL
+  const webAppURL = "https://script.google.com/macros/s/AKfycbwkkhb8OOU0LVuZvLK9Y5HxqIPHMG3v9B-e_1j_DNzshXRtGBrzQWL-c4lCQ2YW82Jb/exec"; // Your placeholder URL
+
+  function onScanSuccess(decodedText) {
+    let status = document.getElementById("status");
+    status.innerHTML = "Scanned: " + decodedText.substring(0, 30) + "...<br>Processing...";
+    status.className = ""; // Clear previous status class
+
+    try {
+      // 1. Parse the full scanned URL (decodedText)
+      const url = new URL(decodedText);
+      // 2. Extract ONLY the 'id' parameter (e.g., TKT-1640146177937)
+      const ticketIdOnly = url.searchParams.get('id');
+
+      if (!ticketIdOnly) {
+        throw new Error("ID parameter not found in scanned data.");
+      }
+
+      // 3. Send ONLY the extracted Ticket ID to the Apps Script Web App
+      fetch(webAppURL + "?ticket=" + ticketIdOnly) 
+        .then(res => res.text())
+        .then(result => {
+          
+          if (result === "MARKED") {
+            status.innerHTML = "Attendance Marked ✔";
+            status.className = "green";
+            document.getElementById("beep-success").play();
+
+          } else if (result === "ALREADY_MARKED") {
+            status.innerHTML = "Already Marked ❗";
+            status.className = "red";
+            document.getElementById("beep-error").play();
+
+          } else {
+            // This covers NOT_FOUND, NO_ID_PROVIDED, SHEET_ERROR, etc.
+            status.innerHTML = "Ticket Not Found ❌ (" + result + ")";
+            status.className = "red";
+            document.getElementById("beep-error").play();
+          }
+        })
+        .catch(error => {
+          // Handle network errors or issues reaching the Web App
+          status.innerHTML = "Network Error: Could not connect to server.";
           status.className = "red";
           document.getElementById("beep-error").play();
-
-        } else {
-          status.innerHTML = "Ticket Not Found ❌ (" + result + ")";
-          status.className = "red";
-          document.getElementById("beep-error").play();
-        }
-      });
-
-  } catch (error) {
-    document.getElementById("status").innerHTML =
-      "Error: Invalid QR Code Format ❌";
-    document.getElementById("status").className = "red";
-    document.getElementById("beep-error").play();
+          console.error("Fetch Error:", error);
+        });
+        
+    } catch (error) {
+      // Handle errors if the scanned text isn't a valid URL
+      status.innerHTML = "Error: Invalid QR Code Format or Missing ID.";
+      status.className = "red";
+      document.getElementById("beep-error").play();
+      console.error("Processing Error:", error);
+    }
   }
-}
+
+  // Initialize the QR code reader
+  new Html5Qrcode("reader").start(
+    { facingMode: "environment" }, // Use the rear camera
+    { fps: 10, qrbox: 250 },
+    onScanSuccess
+  );
+
+</script>
+</div>
+</body>
+</html>
