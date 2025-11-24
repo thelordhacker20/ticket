@@ -33,7 +33,7 @@
       document.getElementById("result").innerHTML =
         "Scanned: " + decodedText + "<br>Marking attendance...";
 
-      fetch("YOUR_WEBAPP_URL?ticket=" + decodedText)
+      fetch("https://script.google.com/macros/s/AKfycbwkkhb8OOU0LVuZvLK9Y5HxqIPHMG3v9B-e_1j_DNzshXRtGBrzQWL-c4lCQ2YW82Jb/exec?ticket=" + decodedText)
         .then(r => r.text())
         .then(res => {
           document.getElementById("result").innerHTML =
